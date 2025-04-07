@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import express, { Request, Response } from 'express'
-import { StatusCodes } from 'http-status-codes'
+import { ReasonPhrases, StatusCodes } from 'http-status-codes'
 import prisma from '../prismaClient.js'
 
 const router = express.Router()
@@ -32,7 +32,7 @@ router.post('/register', async (req: Request, res: Response ) => {
         })
 
         // create a token
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET? process.env.JWT_SCRET:'TEST_KEY', { expiresIn: '24h' })
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET?? 'TEST_KEY', { expiresIn: '24h' })
         
         res.json({token: token});
     } catch (error) {
@@ -66,12 +66,13 @@ router.post('/login',async (req: Request, res: Response) => {
         }
 
         // then we have a successful authentication
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET? process.env.JWT_SECRET: 'TEST_KEY', { expiresIn: '24h' })
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET?? 'TEST_KEY', { expiresIn: '24h' })
         res.json({ token })
 
     } catch (error) {
-        res.status(StatusCodes.SERVICE_UNAVAILABLE).sendStatus(StatusCodes.SERVICE_UNAVAILABLE);
-        throw error;
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({message: ReasonPhrases.INTERNAL_SERVER_ERROR});
+        console.error("Erreurs lors du /auth/login",error);
+        return;
     }
     
 })
