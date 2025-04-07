@@ -3,9 +3,16 @@ import jwt from 'jsonwebtoken';
 import express from 'express';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import prisma from '../prismaClient.js';
+import userRequestValidator from '../helpers/user.validator.js';
+import { validationResult } from 'express-validator';
 const router = express.Router();
 // Register a new user endpoint /auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', userRequestValidator, async (req, res) => {
+    const resultValidation = validationResult(req);
+    if (!resultValidation.isEmpty()) {
+        res.status(StatusCodes.BAD_REQUEST).send({ message: resultValidation.array()[0].msg });
+        return;
+    }
     const { username, password } = req.body;
     const hashpassword = bcrypt.hashSync(password, 8);
     // save the new user and hashed password to the database
@@ -33,7 +40,12 @@ router.post('/register', async (req, res) => {
         throw error;
     }
 });
-router.post('/login', async (req, res) => {
+router.post('/login', userRequestValidator, async (req, res) => {
+    const resultValidation = validationResult(req);
+    if (!resultValidation.isEmpty()) {
+        res.status(StatusCodes.BAD_REQUEST).send({ message: resultValidation.array()[0].msg });
+        return;
+    }
     const { username, password } = req.body;
     try {
         const user = await prisma.user.findUnique({

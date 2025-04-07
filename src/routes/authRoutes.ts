@@ -3,46 +3,66 @@ import jwt from 'jsonwebtoken'
 import express, { Request, Response } from 'express'
 import { ReasonPhrases, StatusCodes } from 'http-status-codes'
 import prisma from '../prismaClient.js'
+import userRequestValidator from '../helpers/user.validator.js'
+import { validationResult } from 'express-validator'
 
 const router = express.Router()
 
 // Register a new user endpoint /auth/register
-router.post('/register', async (req: Request, res: Response ) => {
-    const { username,password } = req.body
+router.post(
+    '/register', 
+    userRequestValidator,
+    async (req: Request, res: Response ) => {
+    
+        const resultValidation = validationResult(req);
 
-    const hashpassword = bcrypt.hashSync(password,8);
+        if (!resultValidation.isEmpty()){
+            res.status(StatusCodes.BAD_REQUEST).send({message: resultValidation.array()[0].msg as string });
+            return;
+        }
 
-    // save the new user and hashed password to the database
-    try {
-        const user = await prisma.user.create({
-            data: {
-                username,
-                password: hashpassword
-            }
-        })
+        const { username,password } = req.body
 
-        // now that we have a user, I want to add their first todo for them
-        const defaultToDo = `Hello :) Add your first todo!`;
-        await prisma.todo.create({
-            data: {
-                task: defaultToDo,
-                userId: user.id,
+        const hashpassword = bcrypt.hashSync(password,8);
 
-            }
-        })
+        // save the new user and hashed password to the database
+        try {
+            const user = await prisma.user.create({
+                data: {
+                    username,
+                    password: hashpassword
+                }
+            })
 
-        // create a token
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET?? 'TEST_KEY', { expiresIn: '24h' })
-        
-        res.json({token: token});
-    } catch (error) {
-        res.status(StatusCodes.SERVICE_UNAVAILABLE).sendStatus(503);
-        throw error
-    }
+            // now that we have a user, I want to add their first todo for them
+            const defaultToDo = `Hello :) Add your first todo!`;
+            await prisma.todo.create({
+                data: {
+                    task: defaultToDo,
+                    userId: user.id,
+
+                }
+            })
+
+            // create a token
+            const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET?? 'TEST_KEY', { expiresIn: '24h' })
+            
+            res.json({token: token});
+        } catch (error) {
+            res.status(StatusCodes.SERVICE_UNAVAILABLE).sendStatus(503);
+            throw error
+        }
     
 })
 
-router.post('/login',async (req: Request, res: Response) => {
+router.post('/login',userRequestValidator,async (req: Request, res: Response) => {
+    const resultValidation = validationResult(req);
+
+    if (!resultValidation.isEmpty()){
+        res.status(StatusCodes.BAD_REQUEST).send({message: resultValidation.array()[0].msg as string});
+        return;
+    }
+        
     const { username, password } = req.body;
 
     try {
