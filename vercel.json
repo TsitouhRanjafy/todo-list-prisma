@@ -1,0 +1,17 @@
+{ 
+    "version": 2, 
+    "build": [
+        {
+            "src":"dist/server.js",
+            "use":"@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "server.js"
+        }
+    ], 
+    "buildCommand": "npx tsc",
+    "installCommand": "npm install"
+}   
