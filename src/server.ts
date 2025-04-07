@@ -21,9 +21,15 @@ app.use(express.static(path.join(__dirname,'../public')))
 // Routes
 app.use('/auth',routerAuth);
 app.use('/todos',authMiddleware,routerToDo);
-
-app.get("*",(req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname,'../public','salama.html'));
+app.get("/",(req: Request, res: Response) => {
+    try {
+        res.sendFile(path.join(__dirname,'../public','salama.html'));
+        return;
+    } catch (error) {
+        console.error("Erreurs lors '/'",error);
+        throw error;
+    }
 })
+
 
 export default app;
