@@ -17,6 +17,11 @@ router.post('/register', userRequestValidator, async (req, res) => {
     const hashpassword = bcrypt.hashSync(password, 8);
     // save the new user and hashed password to the database
     try {
+        const isUserExist = await prisma.user.findUnique({ where: { username } });
+        if (isUserExist) {
+            res.status(StatusCodes.BAD_REQUEST).send({ message: "user aleardy exist" });
+            return;
+        }
         const user = await prisma.user.create({
             data: {
                 username,
@@ -33,10 +38,10 @@ router.post('/register', userRequestValidator, async (req, res) => {
         });
         // create a token
         const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET ?? 'TEST_KEY', { expiresIn: '24h' });
-        res.json({ token: token });
+        res.status(StatusCodes.ACCEPTED).json({ token: token });
     }
     catch (error) {
-        res.status(StatusCodes.SERVICE_UNAVAILABLE).sendStatus(503);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: ReasonPhrases.INTERNAL_SERVER_ERROR });
         throw error;
     }
 });
@@ -65,12 +70,11 @@ router.post('/login', userRequestValidator, async (req, res) => {
             return;
         }
         // then we have a successful authentication
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET ?? 'TEST_KEY', { expiresIn: '24h' });
-        res.json({ token });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET ?? 'TEST_KEY', { expiresIn: '24h' });
+        res.status(StatusCodes.OK).json({ token });
     }
     catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: ReasonPhrases.INTERNAL_SERVER_ERROR });
-        console.error("Erreurs lors du /auth/login", error);
         return;
     }
 });

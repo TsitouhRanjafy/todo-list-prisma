@@ -31,8 +31,8 @@ app.get("/",(req: Request, res: Response) => {
     }
 })
 
-// app.listen(PORT,() => {
-//     console.log(`   on http://localhost:${PORT}`);
-// })
+app.listen(PORT,() => {
+    console.log(`   on http://localhost:${PORT}`);
+})
 
 export default app;

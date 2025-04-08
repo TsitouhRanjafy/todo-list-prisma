@@ -11,7 +11,6 @@ router.get("/", async (req: Request, res: Response) => {
             userId: req.body.user_id
         }
     });
-
     res.status(StatusCodes.OK).json(todos);
 })
 

@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
         throw error;
     }
 });
-// app.listen(PORT,() => {
-//     console.log(`   on http://localhost:${PORT}`);
-// })
+app.listen(PORT, () => {
+    console.log(`   on http://localhost:${PORT}`);
+});
 export default app;

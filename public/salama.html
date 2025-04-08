@@ -19,7 +19,7 @@
             <p>Create an account!</p>
         </div>
 
-        <p id="error" style="display: none;"></p>
+        <p id="error" style="display: none; color:rgb(141, 0, 0);"></p>
         <input id="emailInput" placeholder="Email" />
         <input id="passwordInput" placeholder="********" type="password" />
         <button id="authBtn" onclick="authenticate();">
@@ -200,12 +200,15 @@
             let data
             if (isRegistration) {
                 // register an account
+
                 const response = await fetch(apiBase + 'auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: emailVal, password: passVal })
                 })
+                
                 data = await response.json()
+
             } else {
                 // login an account
                 
@@ -215,12 +218,12 @@
                     body: JSON.stringify({ username: emailVal, password: passVal })
                 })
                 data = await response.json()
-                console.log(data);
             }
 
             
             if (data.token) {
                 token = data.token
+                console.log("front: ",token);
                 localStorage.setItem('token', token)
 
                 // authenicating into loading
@@ -232,7 +235,7 @@
                 // show dashboard
                 showDashboard()
             } else {
-                throw Error('❌ Failed to authenticate...')
+                throw Error(data.message)
             }
 
         } catch (err) {
@@ -255,13 +258,19 @@
 
     async function fetchTodos() {
         isLoading = true
+        console.log(localStorage.getItem('token'));
+
         const response = await fetch(apiBase + 'todos', {
             headers: { 'Authorization': token }
         })
         const todosData = await response.json()
-        todos = todosData
-        isLoading = false
-        renderTodos()
+        if (!response.ok){
+            throw Error(todosData.message);
+        } else {
+            todos = todosData
+            isLoading = false
+            renderTodos()
+        }
     }
 
     async function updateTodo(index) {
