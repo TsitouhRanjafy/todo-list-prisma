@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken'
 import { IJwtPayload } from '../model/user.type';
-import dotenv from "dotenv"
+// import dotenv from "dotenv"
 
-dotenv.config()
+// dotenv.config()
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']
 

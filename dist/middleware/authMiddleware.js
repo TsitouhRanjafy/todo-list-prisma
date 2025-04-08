@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv"
+// dotenv.config()
 const authMiddleware = (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) {
