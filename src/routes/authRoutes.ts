@@ -5,6 +5,7 @@ import { ReasonPhrases, StatusCodes } from 'http-status-codes'
 import prisma from '../prismaClient.js'
 import userRequestValidator from '../helpers/user.validator.js'
 import { validationResult } from 'express-validator'
+import { env } from '../config/env.js'
 
 const router = express.Router()
 
@@ -50,7 +51,7 @@ router.post(
             })
 
             // create a token
-            const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET?? 'TEST_KEY', { expiresIn: '24h' });
+            const token = jwt.sign({ id: user.id }, env().jwt_secret_key, { expiresIn: '24h' });
             
             res.status(StatusCodes.ACCEPTED).json({token: token});
         } catch (error) {
@@ -91,7 +92,7 @@ router.post('/login',userRequestValidator,async (req: Request, res: Response) =>
         }
 
         // then we have a successful authentication
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SCRET?? 'TEST_KEY', { expiresIn: '24h' })
+        const token = jwt.sign({ id: user.id }, env().jwt_secret_key, { expiresIn: '24h' })
         res.status(StatusCodes.OK).json({ token })
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({message: ReasonPhrases.INTERNAL_SERVER_ERROR});

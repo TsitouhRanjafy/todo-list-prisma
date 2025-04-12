@@ -4,10 +4,8 @@ import { fileURLToPath } from 'node:url';
 import routerAuth from './routes/authRoutes.js'; // .js / .mjs / .cjs
 import routerToDo from './routes/todoRoutes.js';
 import authMiddleware from './middleware/authMiddleware.js';
-// import dotenv from "dotenv"
-// dotenv.config()
+import { env } from './config/env.js';
 const app = express();
-const PORT = process.env.PORT || 4000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Middleware
@@ -26,7 +24,7 @@ app.get("/", (req, res) => {
         throw error;
     }
 });
-// app.listen(PORT,() => {
-//     console.log(`   on http://localhost:${PORT}`);
-// })
+app.listen(env().port, () => {
+    console.log(`   on http://localhost:${env().port}`);
+});
 export default app;
